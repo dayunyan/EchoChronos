@@ -4,14 +4,14 @@ from mindspore.dataset import GeneratorDataset
 
 from .base import BaseDataset
 from .wukong import WukongDataset
+from .style import StyleTransferTaskDataset
 
 
-def process_dataset(source, batch_size=32, shuffle=False):
+def process_dataset(source, tokenizer, max_length, batch_size=32, shuffle=False):
 
     column_names = [
-        "input_ids",
-        "attention_mask",
-        "labels",
+        "inputs",
+        "output_sentence",
         "text_inputs",
         "text_labels",
     ]
@@ -21,11 +21,36 @@ def process_dataset(source, batch_size=32, shuffle=False):
     # dataset = dataset.batch(batch_size)
     # print(type(next(enumerate(dataset))[1][0]))
     # squeeze
-    for name in column_names[0:-2]:
-        dataset = dataset.map(
-            operations=lambda x: np.squeeze(x, 0),
-            input_columns=name,
-            output_columns=name,
-        )
+
+    dataset = dataset.map(
+        operations=lambda x: (
+            tokenizer(
+                x,
+                max_length=max_length,
+                padding="max_length",
+                truncation=True,
+            )["input_ids"],
+            tokenizer(
+                x,
+                max_length=max_length,
+                padding="max_length",
+                truncation=True,
+            )["attention_mask"],
+        ),
+        input_columns="inputs",
+        output_columns=["input_ids", "attention_mask"],
+    )
+    dataset = dataset.map(
+        operations=lambda x: (
+            tokenizer(
+                x,
+                max_length=max_length,
+                padding="max_length",
+                truncation=True,
+            )["input_ids"],
+        ),
+        input_columns="output_sentence",
+        output_columns="labels",
+    )
 
     return dataset

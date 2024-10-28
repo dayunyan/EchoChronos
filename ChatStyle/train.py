@@ -1,55 +1,78 @@
 import json
+import os
 import mindspore as ms
 from mindspore import context
 from mindspore import nn
 from mindnlp.core import optim
 from mindnlp.transformers.optimization import get_polynomial_decay_schedule_with_warmup
+from mindnlp import dataset as ds
 from mindspore.nn.learning_rate_schedule import PolynomialDecayLR
+from mindspore.communication import init
+from mindspore.amp import auto_mixed_precision
 from tqdm import tqdm
 import numpy as np
 import argparse
 
 from mydatasets import process_dataset
-from mydatasets import BaseDataset, WukongDataset
+from mydatasets import BaseDataset, StyleTransferTaskDataset
 
-from mindnlp.transformers import ChatGLM3Tokenizer, ChatGLM3ForConditionalGeneration
-from mindnlp.peft import get_peft_model, TaskType, IA3Config, IA3Model
+from mindnlp.transformers import (
+    AutoModelForCausalLM,
+    AutoTokenizer,
+    ChatGLM3Tokenizer,
+    ChatGLM3ForConditionalGeneration,
+)
+from mindnlp.peft import get_peft_model, TaskType, IA3Config, LoraConfig
 from mindnlp.peft import PeftModel, PeftConfig
-from mindnlp.engine import Trainer, TrainingArguments
+from mindnlp.engine import Trainer, TrainingArguments, EvalPrediction
+import evaluate
+
+from nltk.translate.bleu_score import corpus_bleu
 
 context.set_context(mode=context.PYNATIVE_MODE, device_target="GPU")
 context.set_context(device_id=1)
+# ms.set_auto_parallel_context(
+#     parallel_mode=ms.ParallelMode.AUTO_PARALLEL, gradients_mean=True
+# )
+# init("nccl")
 
 
 def get_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--model_name_or_path", type=str, default="ZhipuAI/chatglm3-6b")
-    parser.add_argument("--peft_type", type=str, default="IA3")
-    parser.add_argument("--task_type", type=str, default="CAUSAL_LM")
-    parser.add_argument("--train_file", type=str, default="./XiYouJi/SunWuKong.json")
-    parser.add_argument("--max_length", type=int, default=128)
-    parser.add_argument("--batch_size", type=int, default=8)
-    parser.add_argument("--num_epochs", type=int, default=20)
-    parser.add_argument("--learning_rate", type=float, default=0.001)
+    parser.add_argument("--num_workers", type=int, default=os.cpu_count() // 4)
+    parser.add_argument(
+        "--model_name_or_path", type=str, default="Qwen/Qwen2-7B-Instruct"
+    )  # ZhipuAI/chatglm3-6b
+    parser.add_argument("--peft_type", type=str, default="LoRA")
+    parser.add_argument("--task_type", type=str, default="CAUSAL_LM")  # SEQ_2_SEQ_LM
+    parser.add_argument(
+        "--train_file", type=str, default="./XiYouJi/XiYouji_Preference.json"
+    )
+    parser.add_argument("--max_length", type=int, default=64)
+    parser.add_argument("--batch_size", type=int, default=4)
+    parser.add_argument("--num_epochs", type=int, default=2)
+    parser.add_argument("--learning_rate", type=float, default=1e-3)
     parser.add_argument("--power", type=float, default=0.9)
     parser.add_argument("--save_dir", type=str, default="./checkpoints")
     return parser.parse_args()
 
 
 def run(args):
-    tokenizer = ChatGLM3Tokenizer.from_pretrained(
-        args.model_name_or_path, mirror="modelscope", revision="master"
-    )
-    model = ChatGLM3ForConditionalGeneration.from_pretrained(
-        args.model_name_or_path, mirror="modelscope", revision="master"
-    )
-
     max_length = args.max_length
     batch_size = args.batch_size
+    # dataset = ds.load_dataset("bentrevett/multi30k")
+    # train_dataset = dataset["train"].shuffle(32)
+    # eval_dataset = dataset["validation"].shuffle(32)
+
+    tokenizer = AutoTokenizer.from_pretrained(
+        args.model_name_or_path, mirror="modelscope", revision="master"
+    )
     dataset = process_dataset(
-        WukongDataset(
-            args.train_file, tokenizer, max_length, file_encoding="utf-8"
+        StyleTransferTaskDataset(
+            args.train_file, instruction="将白话文转换成文言文。", file_encoding="utf-8"
         ),  # gb18030
+        tokenizer=tokenizer,
+        max_length=max_length,
         batch_size=batch_size,
         shuffle=True,
     )
@@ -57,14 +80,84 @@ def run(args):
     print(next(train_dataset.create_dict_iterator()))
     # print(next(eval_dataset.create_dict_iterator()))
 
-    peft_config = IA3Config(
-        peft_type=TaskType.CAUSAL_LM,
+    # instruction = ["[system]: 将下面的英文句子翻译成德文。[user]: ", "[assistant]: "]
+    # train_dataset = train_dataset.map(
+    #     lambda x: (
+    #         tokenizer(
+    #             str(x).join(instruction),
+    #             max_length=max_length,
+    #             padding="max_length",
+    #             truncation=True,
+    #         )["input_ids"],
+    #         tokenizer(
+    #             str(x).join(instruction),
+    #             max_length=max_length,
+    #             padding="max_length",
+    #             truncation=True,
+    #         )["attention_mask"],
+    #     ),
+    #     input_columns="en",
+    #     output_columns=["input_ids", "attention_mask"],
+    # )
+    # train_dataset = train_dataset.map(
+    #     lambda x: tokenizer(
+    #         str(x).join(instruction),
+    #         max_length=max_length,
+    #         padding="max_length",
+    #         truncation=True,
+    #     )["input_ids"],
+    #     input_columns="de",
+    #     output_columns="labels",
+    # )
+    # eval_dataset = eval_dataset.map(
+    #     lambda x: (
+    #         tokenizer(
+    #             str(x).join(instruction),
+    #             max_length=max_length,
+    #             padding="max_length",
+    #             truncation=True,
+    #         )["input_ids"],
+    #         tokenizer(
+    #             str(x).join(instruction),
+    #             max_length=max_length,
+    #             padding="max_length",
+    #             truncation=True,
+    #         )["attention_mask"],
+    #     ),
+    #     input_columns="en",
+    #     output_columns=["input_ids", "attention_mask"],
+    # )
+    # eval_dataset = eval_dataset.map(
+    #     lambda x: tokenizer(
+    #         str(x).join(instruction),
+    #         max_length=max_length,
+    #         padding="max_length",
+    #         truncation=True,
+    #     )["input_ids"],
+    #     input_columns="de",
+    #     output_columns="labels",
+    # )
+    # print(next(train_dataset.create_dict_iterator()))
+
+    model = AutoModelForCausalLM.from_pretrained(
+        args.model_name_or_path, mirror="modelscope", revision="master"
+    ).half()
+
+    # peft_config = IA3Config(
+    #     peft_type=TaskType.CAUSAL_LM,
+    #     inference_mode=False,
+    #     target_modules=["q_proj", "v_proj"],  # ["query_key_value"]
+    #     feedforward_cells=[],
+    # )
+    peft_config = LoraConfig(
+        task_type=TaskType.CAUSAL_LM,
         inference_mode=False,
-        target_modules=["query_key_value"],
-        feedforward_cells=[],
-    )  # ,target_cells=["query_key_value"], feedforward_cells=[]
-    # peft_config = LoraConfig(task_type=TaskType.CAUSAL_LM, inference_mode=False, r=8, lora_alpha=32, lora_dropout=0.1)
-    model = get_peft_model(model, peft_config)
+        r=8,
+        lora_alpha=32,
+        lora_dropout=0.1,
+        target_modules=["q_proj", "v_proj"],
+    )
+    model = get_peft_model(model, peft_config).half()
     model.print_trainable_parameters()
 
     training_args = TrainingArguments(
@@ -72,23 +165,38 @@ def run(args):
         evaluation_strategy="epoch",
         per_device_train_batch_size=args.batch_size,
         per_device_eval_batch_size=1,
+        dataset_num_workers=args.num_workers,
         learning_rate=args.learning_rate,
         num_train_epochs=args.num_epochs,
         lr_scheduler_type="polynomial",
         lr_scheduler_kwargs={
-            "lr_end": args.learning_rate * 0.0001,
+            "lr_end": args.learning_rate * 1e-5,
             "power": args.power,
         },
         logging_steps=200,
         save_strategy="epoch",
         save_total_limit=1,
         # load_best_model_at_end=True,
+        fp16=True,
+        fp16_opt_level="O3",
     )
+
+    metric = evaluate.load("accuracy")
+
+    def compute_bleu_metrics(eval_pred: EvalPrediction):
+        predictions, labels = eval_pred
+        bleu_scores = []
+        for prediction, label in zip(predictions, labels):
+            score = corpus_bleu([label], prediction)
+            bleu_scores.append(score)
+        return np.mean(bleu_scores)
+
     trainer = Trainer(
         model=model,
         args=training_args,
         train_dataset=train_dataset,
         eval_dataset=eval_dataset,
+        compute_metrics=compute_bleu_metrics,
     )
     trainer.train()  # resume_from_checkpoint="./checkpoints/checkpoint-8880"
 
