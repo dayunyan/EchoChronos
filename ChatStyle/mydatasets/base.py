@@ -24,7 +24,7 @@ class BaseDataset:
         instruction = self.instruction[index]
         inputs = self.input_sentence[index]
         inputs = "[System]: " + instruction + "[User]: " + inputs + "[Assistant]: "
-        output_sentence = self.output_sentence[index]
+        output_sentence = inputs + self.output_sentence[index]
 
         return (
             inputs,

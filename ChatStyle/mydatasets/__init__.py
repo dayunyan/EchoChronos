@@ -18,7 +18,6 @@ def process_dataset(source, tokenizer, max_length, batch_size=32, shuffle=False)
 
     dataset = GeneratorDataset(source, column_names=column_names, shuffle=shuffle)
 
-    # dataset = dataset.batch(batch_size)
     # print(type(next(enumerate(dataset))[1][0]))
     # squeeze
 
@@ -52,5 +51,6 @@ def process_dataset(source, tokenizer, max_length, batch_size=32, shuffle=False)
         input_columns="output_sentence",
         output_columns="labels",
     )
-
+    if batch_size is not None:
+        dataset = dataset.batch(batch_size)
     return dataset

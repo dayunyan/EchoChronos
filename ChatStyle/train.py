@@ -41,16 +41,16 @@ def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--num_workers", type=int, default=os.cpu_count() // 4)
     parser.add_argument(
-        "--model_name_or_path", type=str, default="Qwen/Qwen2-7B-Instruct"
-    )  # ZhipuAI/chatglm3-6b
+        "--model_name_or_path", type=str, default="Qwen/Qwen2.5-3B"
+    )  # ZhipuAI/chatglm3-6b Qwen/Qwen2-7B-Instruct
     parser.add_argument("--peft_type", type=str, default="LoRA")
     parser.add_argument("--task_type", type=str, default="CAUSAL_LM")  # SEQ_2_SEQ_LM
     parser.add_argument(
         "--train_file", type=str, default="./XiYouJi/XiYouji_Preference.json"
     )
     parser.add_argument("--max_length", type=int, default=64)
-    parser.add_argument("--batch_size", type=int, default=4)
-    parser.add_argument("--num_epochs", type=int, default=2)
+    parser.add_argument("--batch_size", type=int, default=8)
+    parser.add_argument("--num_epochs", type=int, default=20)
     parser.add_argument("--learning_rate", type=float, default=1e-3)
     parser.add_argument("--power", type=float, default=0.9)
     parser.add_argument("--save_dir", type=str, default="./checkpoints")
@@ -141,7 +141,7 @@ def run(args):
 
     model = AutoModelForCausalLM.from_pretrained(
         args.model_name_or_path, mirror="modelscope", revision="master"
-    ).half()
+    )
 
     # peft_config = IA3Config(
     #     peft_type=TaskType.CAUSAL_LM,
@@ -157,7 +157,7 @@ def run(args):
         lora_dropout=0.1,
         target_modules=["q_proj", "v_proj"],
     )
-    model = get_peft_model(model, peft_config).half()
+    model = get_peft_model(model, peft_config)
     model.print_trainable_parameters()
 
     training_args = TrainingArguments(
