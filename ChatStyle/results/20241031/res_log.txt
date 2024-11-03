@@ -1,0 +1,95 @@
+########################## inputs = "[System]: 将白话文转换成文言文。[User]: "+inputs+"[Assistant]: " ###################
+
+Q: 行者笑着说道：“这小伙子真是不谙世事！哪见过贼人会在白天动手？像这样偷偷摸摸的，得在晚上偷偷摸摸地去，才能不被察觉，这才是行窃之道。
+{'input_ids': Tensor(shape=[1, 68], dtype=Int64, value=
+[[85026,  5669, 58230 ... 71703,  5669,   220]]), 'attention_mask': Tensor(shape=[1, 68], dtype=Int64, value=
+[[1, 1, 1 ... 1, 1, 1]]), 'max_new_tokens': 128}
+Setting `pad_token_id` to `eos_token_id`:151643 for open-end generation.
+A: ['[System]: 将白话文转换成文言文。[User]: 行者笑着说道：“这小伙子真是不谙世事！哪见过贼人会在白天动手？像这样偷偷摸摸的，得在晚上偷偷摸摸地去，才能不被察觉，这才是行窃之道。[Assistant]: �者笑道：“这小子真是个贼！哪有见过贼人白天动手的？他一定是半夜潜入，半夜里才敢出来，偷走师父的行李，然后半夜里悄悄地溜走了。他一定是个贼！”']
+Q: 这个精怪是怎样的？鼻子是金的，毛茸茸的身体被雪覆盖着。
+{'input_ids': Tensor(shape=[1, 43], dtype=Int64, value=
+[[85026,  5669, 58230 ... 71703,  5669,   220]]), 'attention_mask': Tensor(shape=[1, 43], dtype=Int64, value=
+[[1, 1, 1 ... 1, 1, 1]]), 'max_new_tokens': 128}
+Setting `pad_token_id` to `eos_token_id`:151643 for open-end generation.
+A: ['[System]: 将白话文转换成文言文。[User]: 这个精怪是怎样的？鼻子是金的，毛茸茸的身体被雪覆盖着。[Assistant]: �怪是怎样的模样？鼻子是金的，毛茸茸的。']
+Q: 国王看到后非常高兴，大声称赞道：“真是个在翠栏边轻轻摇手高歌的人！”
+{'input_ids': Tensor(shape=[1, 45], dtype=Int64, value=
+[[85026,  5669, 58230 ... 71703,  5669,   220]]), 'attention_mask': Tensor(shape=[1, 45], dtype=Int64, value=
+[[1, 1, 1 ... 1, 1, 1]]), 'max_new_tokens': 128}
+Setting `pad_token_id` to `eos_token_id`:151643 for open-end generation.
+A: ['[System]: 将白话文转换成文言文。[User]: 国王看到后非常高兴，大声称赞道：“真是个在翠栏边轻轻摇手高歌的人！”[Assistant]: ��国王见了，十分高兴，道：“好！”好！好！好！好！好！']
+Q: 行者说：“虽然我知道，但我作为一个远方的僧人，还没有与你相遇过。”
+{'input_ids': Tensor(shape=[1, 41], dtype=Int64, value=
+[[85026,  5669, 58230 ... 71703,  5669,   220]]), 'attention_mask': Tensor(shape=[1, 41], dtype=Int64, value=
+[[1, 1, 1 ... 1, 1, 1]]), 'max_new_tokens': 128}
+Setting `pad_token_id` to `eos_token_id`:151643 for open-end generation.
+A: ['[System]: 将白话文转换成文言文。[User]: 行者说：“虽然我知道，但我作为一个远方的僧人，还没有与你相遇过。”[Assistant]: �者道：“我虽知，但与你相遇，你还是个远方的僧人。”']
+Q: 连续喷射了几次，只看到火焰熊熊，大火熊熊地燃烧着，把整个火云洞都笼罩在烟火之中，简直就像是火海一样。
+{'input_ids': Tensor(shape=[1, 58], dtype=Int64, value=
+[[85026,  5669, 58230 ... 71703,  5669,   220]]), 'attention_mask': Tensor(shape=[1, 58], dtype=Int64, value=
+[[1, 1, 1 ... 1, 1, 1]]), 'max_new_tokens': 128}
+Setting `pad_token_id` to `eos_token_id`:151643 for open-end generation.
+A: ['[System]: 将白话文转换成文言文。[User]: 连续喷射了几次，只看到火焰熊熊，大火熊熊地燃烧着，把整个火云洞都笼罩在烟火之中，简直就像是火海一样。[Assistant]: �喷了几喷，只见火焰熊熊，火光冲天，把火云洞都笼罩在火光中，火光映照出洞口。']
+Q: 行者笑着说：“先生，你弄错了。我曾与你的兄长交朋友，小时候也与他的七位兄弟一起玩耍过。只是我不知您的府第，未能拜访。如今您的侄子已经得到了好处，跟随观音菩萨成了善财童子，我们都比不上他，怎么能责怪我呢？”
+{'input_ids': Tensor(shape=[1, 89], dtype=Int64, value=
+[[85026,  5669, 58230 ... 71703,  5669,   220]]), 'attention_mask': Tensor(shape=[1, 89], dtype=Int64, value=
+[[1, 1, 1 ... 1, 1, 1]]), 'max_new_tokens': 128}
+Setting `pad_token_id` to `eos_token_id`:151643 for open-end generation.
+A: ['[System]: 将白话文转换成文言文。[User]: 行者笑着说：“先生，你弄错了。我曾与你的兄长交朋友，小时候也与他的七位兄弟一起玩耍过。只是我不知您的府第，未能拜访。如今您的侄子已经得到了好处，跟随观音菩萨成了善财童子，我们都比不上他，怎么能责怪我呢？”[Assistant]: �者笑道：“先生，你弄错了。我与你兄长交过朋友，与他一起玩耍过，与他侄子一起玩耍过，不知他的姓氏。如今他得了好处，我岂能与他相比？我只怪你得了好处，你又与他攀比什么？快与他一起拜佛，求经取经，这样才公平公正。”[']
+Q: 你是谁？我好像没有见过你。
+{'input_ids': Tensor(shape=[1, 30], dtype=Int64, value=
+[[85026,  5669, 58230 ... 71703,  5669,   220]]), 'attention_mask': Tensor(shape=[1, 30], dtype=Int64, value=
+[[1, 1, 1 ... 1, 1, 1]]), 'max_new_tokens': 128}
+Setting `pad_token_id` to `eos_token_id`:151643 for open-end generation.
+A: ['[System]: 将白话文转换成文言文。[User]: 你是谁？我好像没有见过你。[Assistant]: 你是谁？我怎么认得你？']
+Q: 我今年已经二百七十岁了，只挣了几百件袈裟，但都比不上他的那一件啊！
+{'input_ids': Tensor(shape=[1, 46], dtype=Int64, value=
+[[85026,  5669, 58230 ... 71703,  5669,   220]]), 'attention_mask': Tensor(shape=[1, 46], dtype=Int64, value=
+[[1, 1, 1 ... 1, 1, 1]]), 'max_new_tokens': 128}
+Setting `pad_token_id` to `eos_token_id`:151643 for open-end generation.
+A: ['[System]: 将白话文转换成文言文。[User]: 我今年已经二百七十岁了，只挣了几百件袈裟，但都比不上他的那一件啊！[Assistant]: �年已过百数，只得百数十件袈裟，却只够他束腰的。']
+Q: 有高山，就有深渊；有黄沙漫天，，就有腥风血雨。我已经逃不掉了，你也逃不掉了。
+{'input_ids': Tensor(shape=[1, 50], dtype=Int64, value=
+[[85026,  5669, 58230 ... 71703,  5669,   220]]), 'attention_mask': Tensor(shape=[1, 50], dtype=Int64, value=
+[[1, 1, 1 ... 1, 1, 1]]), 'max_new_tokens': 128}
+Setting `pad_token_id` to `eos_token_id`:151643 for open-end generation.
+A: ['[System]: 将白话文转换成文言文。[User]: 有高山，就有深渊；有黄沙漫天，，就有腥风血雨。我已经逃不掉了，你也逃不掉了。[Assistant]: 高山，就有深渊；沙子，也有腥风。我已经逃出了，逃不掉了，你也逃不掉了。']
+Q: 兄弟，别管外面那些乱七八糟的事情，跟我一起来喝酒吧！
+{'input_ids': Tensor(shape=[1, 38], dtype=Int64, value=
+[[85026,  5669, 58230 ... 71703,  5669,   220]]), 'attention_mask': Tensor(shape=[1, 38], dtype=Int64, value=
+[[1, 1, 1 ... 1, 1, 1]]), 'max_new_tokens': 128}
+Setting `pad_token_id` to `eos_token_id`:151643 for open-end generation.
+A: ['[System]: 将白话文转换成文言文。[User]: 兄弟，别管外面那些乱七八糟的事情，跟我一起来喝酒吧！[Assistant]: �弟，别管那些乱七八糟的事，跟我一起喝酒吧！']
+
+################# inputs = "[System]: 将白话文转换成文言文。[User]: "+inputs+"[Assistant]: 行者道：" ################
+
+Q:  行者说：“虽然我知道，但我作为一个远方的僧人，还没有与你相遇过。”
+{'input_ids': Tensor(shape=[1, 45], dtype=Int64, value=
+[[85026,  5669, 58230 ... 28946, 44793,  5122]]), 'attention_mask': Tensor(shape=[1, 45], dtype=Int64, value=
+[[1, 1, 1 ... 1, 1, 1]]), 'max_new_tokens': 128}
+Setting `pad_token_id` to `eos_token_id`:151643 for open-end generation.
+A: ['[System]: 将白话文转换成文言文。[User]: 行者说：“虽然我知道，但我作为一个远方的僧人，还没有与你相遇过。”[Assistant]: 行者道：我虽知，但恐与你相遇，恐有不祥。']
+Q: 行者笑着说：“先生，你弄错了。我曾与你的兄长交朋友，小时候也与他的七位兄弟一起玩耍过。只是我不知您的府第，未能拜访。如今您的侄子已经得到了好处，跟随观音菩萨成了善财童子，我们都比不上他，怎么能责怪我呢？”
+{'input_ids': Tensor(shape=[1, 93], dtype=Int64, value=
+[[85026,  5669, 58230 ... 28946, 44793,  5122]]), 'attention_mask': Tensor(shape=[1, 93], dtype=Int64, value=
+[[1, 1, 1 ... 1, 1, 1]]), 'max_new_tokens': 128}
+Setting `pad_token_id` to `eos_token_id`:151643 for open-end generation.
+A: ['[System]: 将白话文转换成文言文。[User]: 行者笑着说：“先生，你弄错了。我曾与你的兄长交朋友，小时候也与他的七位兄弟一起玩耍过。只是我不知您的府第，未能拜访。如今您的侄子已经得到了好处，跟随观音菩萨成了善财童子，我们都比不上他，怎么能责怪我呢？”[Assistant]: 行者道：先生，你弄错了。我与你兄长交过朋友，你七位兄弟一起玩耍，与他同龄，一起长大，后来又与观音菩萨结为兄弟。如今你得了好处，我岂能与他相比？请与我同去拜佛，向他求教。”[']
+Q: 我今年已经二百七十岁了，只挣了几百件袈裟，但都比不上他的那一件啊！
+{'input_ids': Tensor(shape=[1, 50], dtype=Int64, value=
+[[85026,  5669, 58230 ... 28946, 44793,  5122]]), 'attention_mask': Tensor(shape=[1, 50], dtype=Int64, value=
+[[1, 1, 1 ... 1, 1, 1]]), 'max_new_tokens': 128}
+Setting `pad_token_id` to `eos_token_id`:151643 for open-end generation.
+A: ['[System]: 将白话文转换成文言文。[User]: 我今年已经二百七十岁了，只挣了几百件袈裟，但都比不上他的那一件啊！[Assistant]: 行者道：我今年已得了几百袈裟，只挣了几件，比他少得多，他那件却比我的那件更好。']
+Q: 这个精怪是怎样的？鼻子是金的，毛茸茸的身体被雪覆盖着。
+{'input_ids': Tensor(shape=[1, 47], dtype=Int64, value=
+[[85026,  5669, 58230 ... 28946, 44793,  5122]]), 'attention_mask': Tensor(shape=[1, 47], dtype=Int64, value=
+[[1, 1, 1 ... 1, 1, 1]]), 'max_new_tokens': 128}
+Setting `pad_token_id` to `eos_token_id`:151643 for open-end generation.
+A: ['[System]: 将白话文转换成文言文。[User]: 这个精怪是怎样的？鼻子是金的，毛茸茸的身体被雪覆盖着。[Assistant]: 行者道：这怪是怎样的？鼻子是金的，毛茸茸的。']
+Q: 行者笑着说道：“这小伙子真是不谙世事！哪见过贼人会在白天动手？像这样偷偷摸摸的，得在晚上偷偷摸摸地去，才能不被察觉，这才是行窃之道。
+{'input_ids': Tensor(shape=[1, 72], dtype=Int64, value=
+[[85026,  5669, 58230 ... 28946, 44793,  5122]]), 'attention_mask': Tensor(shape=[1, 72], dtype=Int64, value=
+[[1, 1, 1 ... 1, 1, 1]]), 'max_new_tokens': 128}
+Setting `pad_token_id` to `eos_token_id`:151643 for open-end generation.
+A: ['[System]: 将白话文转换成文言文。[User]: 行者笑着说道：“这小伙子真是不谙世事！哪见过贼人会在白天动手？像这样偷偷摸摸的，得在晚上偷偷摸摸地去，才能不被察觉，这才是行窃之道。[Assistant]: 行者道：这小伙子真是个贼！哪有见过贼人白天动手，他一定是夜行贼。他一定是去偷鸡，抢东西，然后销赃。这下子可得好好教训他一顿了！”']

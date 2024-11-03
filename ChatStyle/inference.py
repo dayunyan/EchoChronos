@@ -18,12 +18,14 @@ context.set_context(device_id=1)
 def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--model_name_or_path", type=str, default="Qwen/Qwen2-7B-Instruct"
+        "--model_name_or_path",
+        type=str,
+        default="Qwen/Qwen2.5-3B",  # Qwen/Qwen2-7B-Instruct
     )
-    parser.add_argument("--peft_type", type=str, default="IA3")
-    parser.add_argument("--task_type", type=str, default="SEQ_2_SEQ_LM")
+    parser.add_argument("--peft_type", type=str, default="LoRA")
+    parser.add_argument("--task_type", type=str, default="CAUSAL_LM")
     parser.add_argument("--train_file", type=str, default="./XiYouJi/XiYouJi.json")
-    parser.add_argument("--inf_max_length", type=int, default=64)
+    parser.add_argument("--inf_max_length", type=int, default=128)
     parser.add_argument("--save_dir", type=str, default="./checkpoints")
     return parser.parse_args()
 
@@ -44,7 +46,10 @@ def inference(args):
             inputs = input("Q: ")
             if inputs in ("exit", "Exit", "quit", "Quit", "e", "q"):
                 break
-            # input_ids = tokenizer(inputs + "行者道：", return_tensors="ms")
+            inputs = (
+                "【System】将下面的句子转换为文言文风格。【User】" + inputs
+            )  # + "【Assitant】"
+            # inputs = "[System]: 将白话文转换成文言文。[User]: "+inputs+"[Assistant]: 行者道："
             message = tokenizer(inputs, return_tensors="ms")
             message["max_new_tokens"] = args.inf_max_length
             print(f"{message}")
