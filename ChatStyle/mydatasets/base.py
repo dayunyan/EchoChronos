@@ -3,12 +3,14 @@ import mindspore as ms
 
 
 class BaseDataset:
-    def __init__(self, filepath, file_encoding="utf-8"):
+    def __init__(self, filepath, tokenizer, file_encoding="utf-8", max_length=512):
         self.path = filepath
         self.instruction = []
         self.input_sentence = []
         self.output_sentence = []
         self.fencoding = file_encoding
+        self.tokenizer = tokenizer
+        self.max_length = max_length
 
     def _load(self):
         """
@@ -26,36 +28,36 @@ class BaseDataset:
         inputs = "[System]: " + instruction + "[User]: " + inputs + "[Assistant]: "
         output_sentence = inputs + self.output_sentence[index]
 
-        return (
+        # return (
+        #     inputs,
+        #     output_sentence,
+        #     inputs,
+        #     output_sentence,
+        # )
+        model_inputs = self.tokenizer(
             inputs,
+            max_length=self.max_length,
+            padding="max_length",
+            truncation=True,
+            # return_tensors="np",
+        )
+        labels = self.tokenizer(
             output_sentence,
+            max_length=self.max_length,
+            padding="max_length",
+            truncation=True,
+            # return_tensors="np",
+        )
+        labels = labels["input_ids"]
+        labels[labels == self.tokenizer.pad_token_id] = -100
+
+        return (
+            model_inputs["input_ids"],
+            model_inputs["attention_mask"],
+            labels,
             inputs,
             output_sentence,
         )
-        # model_inputs = self.tokenizer(
-        #     inputs,
-        #     max_length=self.max_length,
-        #     padding="max_length",
-        #     truncation=True,
-        #     # return_tensors="np",
-        # )
-        # labels = self.tokenizer(
-        #     output_sentence,
-        #     max_length=self.max_length,
-        #     padding="max_length",
-        #     truncation=True,
-        #     # return_tensors="np",
-        # )
-        # labels = labels["input_ids"]
-        # labels[labels == self.tokenizer.pad_token_id] = -100
-
-        # return (
-        #     model_inputs["input_ids"],
-        #     model_inputs["attention_mask"],
-        #     labels,
-        #     inputs,
-        #     output_sentence,
-        # )
 
     def __len__(self):
         return len(self.instruction)

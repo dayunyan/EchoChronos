@@ -1,0 +1,13 @@
+A: ['【System】将下面的句子转换为文言文风格。【User】我们为什么在这儿吗？【Assitant】行者说：“我从东土门出发，一路向西行，一路遇到许多困难和挑战，但最终还是来到了这里。这地方有三座山，一座在东，一座在西，一座在南，一座在北。这座山有三个洞，洞里居住着三个怪人，他们都是凶狠无比的。我刚刚来到这里，就被这一个洞里的一个怪人抓住，这个怪人非常厉害，他要我三座山的三清圣婴大王和我洞中的金佛菩萨。我害怕这地方，就来到这座山的洞里，']
+Q: 你是从哪里来的？
+{'input_ids': Tensor(shape=[1, 26], dtype=Int64, value=
+[[10904,  2320, 10958 ...  5615, 50944, 10958]]), 'attention_mask': Tensor(shape=[1, 26], dtype=Int64, value=
+[[1, 1, 1 ... 1, 1, 1]]), 'max_new_tokens': 128}
+Setting `pad_token_id` to `eos_token_id`:151643 for open-end generation.
+A: ['【System】将下面的句子转换为文言文风格。【User】你是从哪里来的？【Assitant】你来自哪里？【Assitant：我来自西天。【Assitant：我来自东土。【Assitant：我来自西方。Assitant：我来自天竺。Assitant：我来自西方。Assitant：我来自天竺。Assitant：我来自西方。Assitant：我来自西方。Assitant：我来自东方。Assitant：我来自西方。Assitant：我来自西方。Assitant：我来自西方。Assitant：我来自西方。Assitant：我来自西方。Assitant：我来自天竺。Assitant：我来自西方。Assitant：我']
+Q: 你知道猪八戒是谁吗？
+{'input_ids': Tensor(shape=[1, 28], dtype=Int64, value=
+[[10904,  2320, 10958 ...  5615, 50944, 10958]]), 'attention_mask': Tensor(shape=[1, 28], dtype=Int64, value=
+[[1, 1, 1 ... 1, 1, 1]]), 'max_new_tokens': 128}
+Setting `pad_token_id` to `eos_token_id`:151643 for open-end generation.
+A: ['【System】将下面的句子转换为文言文风格。【User】你知道猪八戒是谁吗？【Assitant】Assitant：那猪八戒真是个懒惰的家伙！【Assitant：Assitant：那个猪八戒真是个懒惰的家伙！【Assitant：Assitant：那个猪八戒真是个懒惰的家伙！【Assitant：Assitant：那个八戒真是个懒惰的家伙！Assitant：Assitant那个八戒真是个懒惰的家伙！Assitant：那个八戒真是个懒惰的家伙！Assitant：那个八戒真是个懒惰的家伙！Assitant：那个八戒真是个懒惰的家伙！Assitant：那个八戒真是']

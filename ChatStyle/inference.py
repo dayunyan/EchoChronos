@@ -47,7 +47,9 @@ def inference(args):
             if inputs in ("exit", "Exit", "quit", "Quit", "e", "q"):
                 break
             inputs = (
-                "【System】将下面的句子转换为文言文风格。【User】" + inputs
+                "【System】将下面的句子转换为文言文风格。【User】"
+                + inputs
+                + "【Assitant】"
             )  # + "【Assitant】"
             # inputs = "[System]: 将白话文转换成文言文。[User]: "+inputs+"[Assistant]: 行者道："
             message = tokenizer(inputs, return_tensors="ms")

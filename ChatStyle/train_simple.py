@@ -14,7 +14,7 @@ import numpy as np
 import argparse
 
 from mydatasets import process_dataset
-from mydatasets import BaseDataset, StyleTransferTaskDataset
+from mydatasets import BaseDataset, StyleCausalDataset
 from losser import CrossEntropyLossForCausalLM
 
 from mindnlp.transformers import (
@@ -32,7 +32,9 @@ import evaluate
 
 from metrics import compute_bleu_metrics
 
-context.set_context(mode=context.PYNATIVE_MODE, device_target="GPU")
+context.set_context(
+    device_target="GPU"
+)  # context.set_context(mode=ms.GRAPH_MODE) 新版本mindspore逐步禁用
 # context.set_context(device_id=1)
 ms.set_auto_parallel_context(
     parallel_mode=ms.ParallelMode.DATA_PARALLEL,
@@ -72,11 +74,9 @@ def run(args):
         args.model_name_or_path, mirror="modelscope", revision="master"
     )
     dataset = process_dataset(
-        StyleTransferTaskDataset(
-            args.train_file, instruction="将白话文转换成文言文。", file_encoding="utf-8"
+        StyleCausalDataset(
+            args.train_file, tokenizer, file_encoding="utf-8", max_length=max_length
         ),  # gb18030
-        tokenizer=tokenizer,
-        max_length=max_length,
         batch_size=batch_size,
         shuffle=True,
     )
@@ -121,6 +121,15 @@ def run(args):
     num_batches_eval = len(eval_dataset)
 
     def compute_ce_loss(logits, labels):
+        """deprecated test method
+
+        Args:
+            logits (Tensor)
+            labels (Tensor)
+
+        Returns:
+            Tensor: The cross entropy loss
+        """
         loss_fct = CrossEntropyLossForCausalLM()
         # Enable model parallelism
         loss = loss_fct(logits, labels)
@@ -217,55 +226,6 @@ def run(args):
     # profiler.analyse()
 
 
-def eval(args):
-    import datasets
-
-    peft_model_id = f"{args.model_name_or_path}_{args.peft_type}_{args.task_type}"
-    tokenizer = ChatGLM3Tokenizer.from_pretrained(
-        args.model_name_or_path, mirror="modelscope", revision="master"
-    )
-    model = ChatGLM3ForConditionalGeneration.from_pretrained(args.model_name_or_path)
-    config = PeftConfig.from_pretrained(peft_model_id)
-    model = PeftModel.from_pretrained(model, peft_model_id)
-
-    text_column = "input_ids"
-    model.set_train(False)
-    i = 13
-
-    def load_dataset(filepath):
-        inputs = []
-        labels = []
-        with open(filepath, encoding="gb18030") as f:
-            data = json.load(f)
-            for d in data:
-                inputs.append(d["question"])
-                labels.append(d["answer"])
-
-        dataset = datasets.Dataset.from_dict(
-            {
-                "inputs": inputs,
-                "label": labels,
-            }
-        )
-        return dataset
-
-    dataset = load_dataset("./XiYouJi/XiYouJi.json")
-    dataset = dataset.train_test_split(test_size=0.1)
-    dataset["validation"] = dataset["test"]
-    del dataset["test"]
-
-    inputs = tokenizer(dataset["validation"][text_column][i], return_tensors="ms")
-    print(dataset["validation"][text_column][i])
-    print(inputs)
-
-    outputs = model.generate(input_ids=inputs["input_ids"], max_new_tokens=128)
-    # outputs,_ = model.chat(tokenizer,query=dataset["validation"][text_column][i], max_length=128)
-    print(outputs)
-    text_output = tokenizer.batch_decode(outputs, skip_special_tokens=True)
-    print(text_output)
-
-
 if __name__ == "__main__":
     args = get_args()
     run(args)
-    # eval(args)
