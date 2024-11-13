@@ -1,10 +1,17 @@
 import mindspore as ms
 import numpy as np
 from mindspore.dataset import GeneratorDataset
+from mindnlp.core.ops import tensor
+
 
 from .base import BaseDataset
 from .wukong import WukongDataset
-from .style import StyleSeq2SeqDataset, StyleCausalDataset
+from .style import (
+    StyleSeq2SeqDataset,
+    StyleCausalDataset,
+    StyleAutoregressionDatasetMixin,
+    StyleCausalDatasetMixin,
+)
 
 
 def process_dataset(source, batch_size=32, shuffle=False):

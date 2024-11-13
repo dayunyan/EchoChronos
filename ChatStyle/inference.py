@@ -37,32 +37,55 @@ def inference(args):
 
     # config = PeftConfig.from_pretrained(peft_model_id)
     tokenizer = AutoTokenizer.from_pretrained(args.model_name_or_path)
-    model = AutoModelForCausalLM.from_pretrained(args.model_name_or_path).half()
+    model = AutoModelForCausalLM.from_pretrained(args.model_name_or_path)
     model = PeftModel.from_pretrained(model, peft_model_id)
     model.set_train(False)
 
+    prompt_system = "<|im_start|>system\n{}<|im_end|>\n"
+    prompt_user = "<|im_start|>{}\n<|im_end|>\n<|im_start|>"
+    prompt_assistant = "{}\n<|im_end|>\n"
+    messages = [
+        {"role": "system", "content": "假如你是《西游记》中的某个角色，请与我对话。"}
+    ]
     with ms._no_grad():
         while True:
             inputs = input("Q: ")
             if inputs in ("exit", "Exit", "quit", "Quit", "e", "q"):
                 break
-            inputs = (
-                "【System】将下面的句子转换为文言文风格。【User】"
-                + inputs
-                + "【Assitant】"
-            )  # + "【Assitant】"
-            # inputs = "[System]: 将白话文转换成文言文。[User]: "+inputs+"[Assistant]: 行者道："
-            message = tokenizer(inputs, return_tensors="ms")
-            message["max_new_tokens"] = args.inf_max_length
-            print(f"{message}")
-
-            outputs = model.generate(**message)
-            # outputs,_ = model.chat(tokenizer,query=dataset["validation"][text_column][i], max_length=128)
-            # print(outputs)
-            text_output = tokenizer.batch_decode(
-                outputs.asnumpy(), skip_special_tokens=True
+            messages.append(
+                {"role": "user", "content": inputs},
             )
+            # text = tokenizer.apply_chat_template(
+            #     message,
+            #     tokenize=False,
+            #     truncation=True,
+            #     return_tensors="ms",
+            #     add_generation_prompt=True,
+            # )
+            text = ""
+            for i in range(len(messages)):
+                if messages[i]["role"] == "system":
+                    text += prompt_system.format(messages[i]["content"])
+                elif messages[i]["role"] == "user":
+                    text += prompt_user.format(messages[i]["content"])
+                else:
+                    text += prompt_assistant.format(messages[i]["content"])
+            text += "行者道："
+            # inputs = "[System]: 将白话文转换成文言文。[User]: "+inputs+"[Assistant]: 行者道："
+            model_inputs = tokenizer([text], return_tensors="ms")
+            model_inputs["max_new_tokens"] = args.inf_max_length
+            print(f"{model_inputs}")
+
+            outputs = model.generate(**model_inputs)
+            outputs = [
+                output_ids[len(input_ids) :]
+                for input_ids, output_ids in zip(model_inputs["input_ids"], outputs)
+            ]
+            # print(outputs)
+            text_output = tokenizer.batch_decode(outputs, skip_special_tokens=True)[0]
             print(f"A: {text_output}")
+
+            messages.append({"role": "assistant", "content": text_output})
 
 
 if __name__ == "__main__":
