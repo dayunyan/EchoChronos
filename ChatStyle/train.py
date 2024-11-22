@@ -34,21 +34,21 @@ import evaluate
 
 context.set_context(device_target="GPU")
 # context.set_context(device_id=1)
-ms.set_auto_parallel_context(
-    parallel_mode=ms.ParallelMode.DATA_PARALLEL,
-    gradients_mean=True,
-    parameter_broadcast=True,
-)
-ms.common.set_seed(42)
-init("nccl")
+# ms.set_auto_parallel_context(
+#     parallel_mode=ms.ParallelMode.DATA_PARALLEL,
+#     gradients_mean=True,
+#     parameter_broadcast=True,
+# )
+# ms.common.set_seed(42)
+# init("nccl")
 
 
 def get_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--num_workers", type=int, default=os.cpu_count() // 4)
+    parser.add_argument("--num_workers", type=int, default=os.cpu_count() // 2)
     parser.add_argument(
-        "--model_name_or_path", type=str, default="Qwen/Qwen2.5-3B"
-    )  # ZhipuAI/chatglm3-6b Qwen/Qwen2-7B-Instruct
+        "--model_name_or_path", type=str, default="Qwen/Qwen2-7B-Instruct"
+    )  # ZhipuAI/chatglm3-6b Qwen/Qwen2-7B-Instruct Qwen/Qwen2.5-3B
     parser.add_argument("--peft_type", type=str, default="LoRA")
     parser.add_argument("--task_type", type=str, default="CAUSAL_LM")  # SEQ_2_SEQ_LM
     parser.add_argument(

@@ -11,6 +11,7 @@ from .style import (
     StyleCausalDataset,
     StyleAutoregressionDatasetMixin,
     StyleCausalDatasetMixin,
+    StyleAlpacaSFTDataset,
 )
 
 

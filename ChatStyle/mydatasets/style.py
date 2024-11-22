@@ -2,6 +2,7 @@ from copy import deepcopy
 import json
 import os
 import mindspore as ms
+import numpy as np
 from .base import BaseDataset
 
 DATASETS_MAP = {
@@ -360,3 +361,100 @@ class StyleCausalDatasetMixin(BaseDataset):
             instruction,
             output_sentence,
         )
+
+
+class StyleAlpacaSFTDataset:
+    """
+    Alpaca SFT dataset for style transfer.
+
+    [
+        {
+            "instruction": "人类指令（必填）",
+            "input": "人类输入（选填）",
+            "output": "模型回答（必填）",
+            "system": "系统提示词（选填）",
+            "history": [
+            ["第一轮指令（选填）", "第一轮回答（选填）"],
+            ["第二轮指令（选填）", "第二轮回答（选填）"]
+            ]
+        }
+    ]
+
+    Args:
+        BaseDataset (_type_): _description_
+    """
+
+    def __init__(self, filepath, tokenizer, file_encoding="utf-8", max_length=512):
+        self.path = filepath
+        self.tokenizer = tokenizer
+        self.fencoding = file_encoding
+        self.max_length = max_length
+        self._load()
+        self.prompt_system = "<|im_start|>system\n{}<|im_end|>\n"
+        self.prompt_user = "<|im_start|>user\n{}<|im_end|>\n<|im_start|>"
+        self.prompt_assistant = "assistant\n{}<|im_end|>\n"
+        self.endoftext = "<|endoftext|>"
+
+    def _load(self):
+        with open(
+            self.path,
+            "r",
+            encoding=self.fencoding,
+        ) as f:
+            self.data = json.load(f)
+            f.close()
+
+    def __getitem__(self, index):
+        data: dict = self.data[index]
+        inputs = self.prompt_system.format(
+            data["system"]
+            if data.get("system", False)
+            else "You are a helpful assistant."
+        )
+        inputs_ids = self.tokenizer(inputs)["input_ids"]
+        att_mask = [0] * len(inputs_ids)
+        if isinstance(data.get("history", False), list):
+            for i in range(len(data["history"])):
+                inputs += self.prompt_user.format(data["history"][i][0])
+                temp_ids = self.tokenizer(
+                    self.prompt_user.format(data["history"][i][0])
+                )["input_ids"]
+                inputs_ids += temp_ids
+                att_mask += [0] * len(temp_ids)
+
+                inputs += self.prompt_assistant.format(data["history"][i][1])
+                temp_ids = self.tokenizer(
+                    self.prompt_assistant.format(data["history"][i][1])
+                )["input_ids"]
+                inputs_ids += temp_ids
+                att_mask += [1] * len(temp_ids)
+        inputs += self.prompt_user.format(f"{data['instruction']}\n{data['input']}")
+        temp_ids = self.tokenizer(
+            self.prompt_user.format(f"{data['instruction']}\n{data['input']}")
+        )["input_ids"]
+        inputs_ids += temp_ids
+        att_mask += [0] * len(temp_ids)
+        outputs = self.prompt_assistant.format(data["output"])[:-1] + self.endoftext
+        inputs += outputs
+        temp_ids = self.tokenizer(outputs)["input_ids"]
+        inputs_ids += temp_ids
+        att_mask += [1] * len(temp_ids)
+
+        if len(inputs_ids) != len(att_mask):
+            raise ValueError("inputs_ids and att_mask length not equal")
+
+        if len(inputs_ids) > self.max_length:
+            inputs_ids = inputs_ids[: self.max_length]
+            att_mask = att_mask[: self.max_length]
+        else:
+            inputs_ids += [self.tokenizer.pad_token_id] * (
+                self.max_length - len(inputs_ids)
+            )
+            att_mask += [0] * (self.max_length - len(att_mask))
+
+        outputs_ids = np.where(np.array(att_mask) == 0, -100, inputs_ids).tolist()
+
+        return (inputs_ids, att_mask, outputs_ids, inputs, outputs)
+
+    def __len__(self):
+        return self.data.__len__()
