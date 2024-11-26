@@ -8,14 +8,15 @@ class WukongDataset(BaseDataset):
         super(WukongDataset, self).__init__(
             filepath, tokenizer, max_length, file_encoding
         )
+        self.instruction = ""
         self._load()
 
     def _load(self):
         with open(self.path, encoding=self.fencoding) as f:
             data = json.load(f)
             for d in data:
-                self.instruction.append(d["cause"])
-                self.output_sentence.append(d["effect"])
+                self.input_sentence.append(self.instruction + d["cause"])
+                self.output_sentence.append(d["effect"][0])
 
     def __getitem__(self, index):
         return super().__getitem__(index)

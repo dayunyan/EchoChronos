@@ -1,0 +1,13 @@
+op_side,op_type,op_name,op_full_name,op_occurrences,op_total_time(us),op_avg_time(us),total_proportion,cuda_activity_cost_time(us),cuda_activity_call_count
+Device,Concat,Concat-op9,Default/Concat-op9,36,7075.55,196.543,0.0160805,94672.8,144
+Device,Cast,Cast-op6,Default/Cast-op6,36,906.368,25.1769,0.00205988,842.348,73
+Device,Range,Range-op5,Default/Range-op5,36,2182.43,60.6231,0.00495997,1779.37,180
+Device,Mul,Mul-op8,Default/Mul-op8,36,2867.14,79.6427,0.00651608,48601.3,72
+Device,Div,Div-op4,Default/Div-op4,36,776.992,21.5831,0.00176585,264.011,180
+Device,Sin,Sin-op11,Default/Sin-op11,36,2415.71,67.1031,0.00549014,94667.7,177
+Device,Reshape,Reshape-op7,Default/Reshape-op7,36,889.952,24.7209,0.00202258,834.659,72
+Device,Pow,Pow-op3,Default/Pow-op3,36,893.792,24.8276,0.0020313,272.749,108
+Device,Div,Div-op2,Default/Div-op2,36,858.496,23.8471,0.00195109,186.217,108
+Device,Cast,Cast-op1,Default/Cast-op1,36,1095.71,30.4364,0.0024902,179.432,108
+Device,Cos,Cos-op10,Default/Cos-op10,36,2313.34,64.2596,0.00525749,94879.5,72
+Device,Range,Range-op0,Default/Range-op0,36,417734,11603.7,0.949375,387.759,180

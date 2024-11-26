@@ -1,0 +1,96 @@
+Q: 你是什么人？
+{'input_ids': Tensor(shape=[1, 8], dtype=Int64, value=
+[[ 56568, 102021,  17340 ...  28946,  44793,   5122]]), 'attention_mask': Tensor(shape=[1, 8], dtype=Int64, value=
+[[1, 1, 1 ... 1, 1, 1]]), 'max_new_tokens': 128}
+Setting `pad_token_id` to `eos_token_id`:151643 for open-end generation.
+A: ['你是什么人？行者道：我乃东土大唐差往西天取经者也。']
+Q: 今天天气真好，你带我出去玩耍玩耍吧！
+{'input_ids': Tensor(shape=[1, 17], dtype=Int64, value=
+[[100644, 104307,  88051 ...  28946,  44793,   5122]]), 'attention_mask': Tensor(shape=[1, 17], dtype=Int64, value=
+[[1, 1, 1 ... 1, 1, 1]]), 'max_new_tokens': 128}
+Setting `pad_token_id` to `eos_token_id`:151643 for open-end generation.
+A: ['今天天气真好，你带我出去玩耍玩耍吧！行者道：我与你去，去，去，去！']
+Q: 你长得什么样子？
+{'input_ids': Tensor(shape=[1, 9], dtype=Int64, value=
+[[ 56568, 108504,  99245 ...  28946,  44793,   5122]]), 'attention_mask': Tensor(shape=[1, 9], dtype=Int64, value=
+[[1, 1, 1 ... 1, 1, 1]]), 'max_new_tokens': 128}
+Setting `pad_token_id` to `eos_token_id`:151643 for open-end generation.
+A: ['你长得什么样子？行者道：我是个长嘴大耳的丑怪，你却怎么认得我？']
+Q: 我是听你的故事长大的嘞。
+{'input_ids': Tensor(shape=[1, 12], dtype=Int64, value=
+[[104198,  49187, 103929 ...  28946,  44793,   5122]]), 'attention_mask': Tensor(shape=[1, 12], dtype=Int64, value=
+[[1, 1, 1 ... 1, 1, 1]]), 'max_new_tokens': 128}
+Setting `pad_token_id` to `eos_token_id`:151643 for open-end generation.
+A: ['我是听你的故事长大的嘞。行者道：我那师父，那般模样，那般模样，那般模样，那般模样，那般模样，那般模样，那般模样，那般模样，那般模样，那般模样，那般模样，那般模样，那般模样，那般模样，那般模样，那般模样，那般模样，那般模样，那般模样，那般模样，那般模样，那般模样，那般模样，那般模样，那般模样，那般模样，那般模样，那般模样，那般模样，那般模样，那般模样，']
+Q: 你听说过二郎显圣真君吗？你们的关系怎么样？
+{'input_ids': Tensor(shape=[1, 18], dtype=Int64, value=
+[[ 56568, 113489,  40820 ...  28946,  44793,   5122]]), 'attention_mask': Tensor(shape=[1, 18], dtype=Int64, value=
+[[1, 1, 1 ... 1, 1, 1]]), 'max_new_tokens': 128}
+Setting `pad_token_id` to `eos_token_id`:151643 for open-end generation.
+A: ['你听说过二郎显圣真君吗？你们的关系怎么样？行者道：我与你有亲，你却不知。']
+Q: 你听说过二郎显圣真君吗？
+{'input_ids': Tensor(shape=[1, 14], dtype=Int64, value=
+[[ 56568, 113489,  40820 ...  28946,  44793,   5122]]), 'attention_mask': Tensor(shape=[1, 14], dtype=Int64, value=
+[[1, 1, 1 ... 1, 1, 1]]), 'max_new_tokens': 128}
+Setting `pad_token_id` to `eos_token_id`:151643 for open-end generation.
+A: ['你听说过二郎显圣真君吗？行者道：我曾见他，他却说：‘我乃天界神将，奉玉帝差来捉你。’我道：‘我乃天界神将，奉太师差来捉你。’他道：‘我乃天界神将，奉太师差来捉你。’我道：‘我乃天界神将，奉太师差来捉你。’他道：‘我乃天界神将，奉太师差来捉你。’’']
+Q: 跟我介绍一下你去西天取经的经历吧。
+{'input_ids': Tensor(shape=[1, 15], dtype=Int64, value=
+[[106400, 109432,  56568 ...  28946,  44793,   5122]]), 'attention_mask': Tensor(shape=[1, 15], dtype=Int64, value=
+[[1, 1, 1 ... 1, 1, 1]]), 'max_new_tokens': 128}
+Setting `pad_token_id` to `eos_token_id`:151643 for open-end generation.
+A: ['跟我介绍一下你去西天取经的经历吧。行者道：这番去，须得三年五载，方得回也。']
+Q: 跟我介绍一下你去西天取经的经历吧，尽量多说点。
+{'input_ids': Tensor(shape=[1, 20], dtype=Int64, value=
+[[106400, 109432,  56568 ...  28946,  44793,   5122]]), 'attention_mask': Tensor(shape=[1, 20], dtype=Int64, value=
+[[1, 1, 1 ... 1, 1, 1]]), 'max_new_tokens': 128}
+Setting `pad_token_id` to `eos_token_id`:151643 for open-end generation.
+A: ['跟我介绍一下你去西天取经的经历吧，尽量多说点。行者道：我那去，你却怎么知道？']
+Q: 你知道八戒吗？
+{'input_ids': Tensor(shape=[1, 9], dtype=Int64, value=
+[[107733,  99568, 101372 ...  28946,  44793,   5122]]), 'attention_mask': Tensor(shape=[1, 9], dtype=Int64, value=
+[[1, 1, 1 ... 1, 1, 1]]), 'max_new_tokens': 128}
+Setting `pad_token_id` to `eos_token_id`:151643 for open-end generation.
+A: ['你知道八戒吗？行者道：那呆子，他那般不识人，只管乱嚷，不打紧，只管叫：“师父，莫打！莫打！我那呆子，他那般不识人，只管叫：‘师父！’”']
+Q: 你知道沙和尚吗？
+{'input_ids': Tensor(shape=[1, 9], dtype=Int64, value=
+[[107733,  99617, 109503 ...  28946,  44793,   5122]]), 'attention_mask': Tensor(shape=[1, 9], dtype=Int64, value=
+[[1, 1, 1 ... 1, 1, 1]]), 'max_new_tokens': 128}
+Setting `pad_token_id` to `eos_token_id`:151643 for open-end generation.
+A: ['你知道沙和尚吗？行者道：正是，正是，正是！']
+Q: 你知道唐三藏吗？？
+{'input_ids': Tensor(shape=[1, 11], dtype=Int64, value=
+[[107733, 100181,  44991 ...  28946,  44793,   5122]]), 'attention_mask': Tensor(shape=[1, 11], dtype=Int64, value=
+[[1, 1, 1 ... 1, 1, 1]]), 'max_new_tokens': 128}
+Setting `pad_token_id` to `eos_token_id`:151643 for open-end generation.
+A: ['你知道唐三藏吗？？行者道：我与你道来，你却怎的不认得？']
+Q: 唐三藏和你是什么关系？
+{'input_ids': Tensor(shape=[1, 12], dtype=Int64, value=
+[[100181,  44991,  50366 ...  28946,  44793,   5122]]), 'attention_mask': Tensor(shape=[1, 12], dtype=Int64, value=
+[[1, 1, 1 ... 1, 1, 1]]), 'max_new_tokens': 128}
+Setting `pad_token_id` to `eos_token_id`:151643 for open-end generation.
+A: ['唐三藏和你是什么关系？行者道：我与你无亲无故，怎么就认你做师父？']
+Q: 我今年二百七十岁了，空挣了几百件袈裟，怎么得有他这一件！
+{'input_ids': Tensor(shape=[1, 26], dtype=Int64, value=
+[[ 35946,  88308, 115883 ...  28946,  44793,   5122]]), 'attention_mask': Tensor(shape=[1, 26], dtype=Int64, value=
+[[1, 1, 1 ... 1, 1, 1]]), 'max_new_tokens': 128}
+Setting `pad_token_id` to `eos_token_id`:151643 for open-end generation.
+A: ['我今年二百七十岁了，空挣了几百件袈裟，怎么得有他这一件！行者道：莫说袈裟，只说袈裟，就知我心。你道我有甚宝贝，却不是？']
+Q: 你使的什么武器？
+{'input_ids': Tensor(shape=[1, 10], dtype=Int64, value=
+[[56568, 32555,  9370 ... 28946, 44793,  5122]]), 'attention_mask': Tensor(shape=[1, 10], dtype=Int64, value=
+[[1, 1, 1 ... 1, 1, 1]]), 'max_new_tokens': 128}
+Setting `pad_token_id` to `eos_token_id`:151643 for open-end generation.
+A: ['你使的什么武器？行者道：我那兵器，乃祖传之宝也。']
+Q: 你穿的衣服叫什么名字？
+{'input_ids': Tensor(shape=[1, 11], dtype=Int64, value=
+[[ 56568,  99621, 108231 ...  28946,  44793,   5122]]), 'attention_mask': Tensor(shape=[1, 11], dtype=Int64, value=
+[[1, 1, 1 ... 1, 1, 1]]), 'max_new_tokens': 128}
+Setting `pad_token_id` to `eos_token_id`:151643 for open-end generation.
+A: ['你穿的衣服叫什么名字？行者道：我穿的是甚么衣服？']
+Q: 你有什么本领？
+{'input_ids': Tensor(shape=[1, 8], dtype=Int64, value=
+[[ 56568, 104139, 111305 ...  28946,  44793,   5122]]), 'attention_mask': Tensor(shape=[1, 8], dtype=Int64, value=
+[[1, 1, 1 ... 1, 1, 1]]), 'max_new_tokens': 128}
+Setting `pad_token_id` to `eos_token_id`:151643 for open-end generation.
+A: ['你有什么本领？行者道：我有本事，你却拿住我，教我死，我死，你却放我。']
