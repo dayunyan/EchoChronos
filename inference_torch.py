@@ -78,9 +78,79 @@ def get_prompt(msgs: List[Dict], book: str = "西游记", role: str = "孙悟空
     return text
 
 
-def get_RAG_prompt(msgs: List[Dict], query: str):
-    # TODO get RAG prompt
-    pass
+# format RAG retrieval results
+def format_docs(docs, wiki_docs=None):
+        ans = "从古籍中检索到的信息如下：\n\n"
+        for id, doc in enumerate(docs):
+            ans += f'{id+1}. {doc.page_content}\n\n'
+        if wiki_docs is not None:
+            ans += "从维基百科中检索到的信息如下：\n\n"
+            ans += f'{len(docs)+1}. {wiki_docs[0].metadata["summary"]}\n\n'
+        # print(f'检索到的信息有：{ans}')
+        return ans
+
+
+def get_RAG_prompt(msgs: List[Dict], book: str = "西游记", role: str = "孙悟空", query: str="", model: AutoModelForCausalLM=None, tokenizer: AutoTokenizer=None):
+    if query is None and len(query) == 0:
+        return None
+    
+    assert llm is not None, "llm is required but was not provided"
+
+    # TODO: update when env changed
+    base_rag_path = "/root/work_dir/huawei-ict-2024/RAG/rain-rag"
+    # TODO: change config info if necessary, such as embedding model PATH, retriever PATH, etc.
+
+    import sys
+    sys.path.append(base_rag_path)
+    from config.ConfigLoader import ConfigLoader
+
+    config = ConfigLoader(base_rag_path + "/config/config.yaml")
+
+    # import logging
+    # log_level = config.get("global.log_level", "INFO")
+    # logging.basicConfig(level = log_level,format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    # logger = logging.getLogger(__name__)
+
+    from retrievers.RetrieverCreator import RetrieverCreator
+    from embeddings.TorchBgeEmbeddings import EmbeddingModelCreator
+
+    # logger.info("Creating embedding model...")
+
+    # TODO: add embedding_path
+    embedding_path = ""
+    embedding_creator = EmbeddingModelCreator(config, embedding_path)
+    embedding_model = embedding_creator.create_embedding_model()
+
+    # logger.info("Creating retriever...")
+
+    vecDB_path = base_rag_path + config.get('vector_db.index_path')
+    retriever = RetrieverCreator(config, embedding_model, vecDB_path, collection_name="four_famous").create_retriever()
+
+    retrieved_docs = retriever.invoke(query)
+    retrieved_info = format_docs(retrieved_docs, None)
+
+    from langchain.prompts import PromptTemplate
+    template = """假如你是<{book}>中的{role}，请与我对话。我知道的有： \n
+        {retrieved_info}\n
+        请你回答这个问题： {query}。\n
+        {spec_role}道：“"""
+    
+    input_dict = {"book": book, "role": role, "retrieved_info": retrieved_info, "query": query, "spec_role": ROLE_DICT[book][role]}
+    input = template.format(**input_dict)
+
+    # logger.info("Creating model input...")
+    model_inputs = tokenizer([input], return_tensors="pt").to(model.device)
+    model_inputs["max_new_tokens"] = args.inf_max_length
+
+    # logger.info("Creating RAG prompt...")
+    outputs = model.generate(**model_inputs)
+    outputs = [
+        output_ids[len(input_ids) :]
+        for input_ids, output_ids in zip(model_inputs["input_ids"], outputs)
+    ]
+    text_output = tokenizer.batch_decode(outputs, skip_special_tokens=True)[0]
+
+    return text_output
 
 
 def processTTS(text: str, book: str = "西游记", role: str = "孙悟空"):
