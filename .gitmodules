@@ -1,0 +1,3 @@
+[submodule "RAG/rain-rag"]
+	path = RAG/rain-rag
+	url = https://gitee.com/RunningSpring/rain-rag.git
