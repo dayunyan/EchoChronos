@@ -2,9 +2,9 @@ import os
 import sys
 
 sys.path.append("../RAG/rain-rag")
-# from config.ConfigLoader import ConfigLoader
-# from retrievers.RetrieverCreator import RetrieverCreator
-# from embeddings.TorchBgeEmbeddings import EmbeddingModelCreator
+from config.ConfigLoader import ConfigLoader
+from retrievers.RetrieverCreator import RetrieverCreator
+from embeddings.TorchBgeEmbeddings import EmbeddingModelCreator
 
 
 class RAGManager:
