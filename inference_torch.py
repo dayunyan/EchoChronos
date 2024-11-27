@@ -111,19 +111,20 @@ def get_RAG_prompt(book: str = "西游记", role: str = "孙悟空", query: str 
 
     # logger.info("Creating retriever...")
 
-    vecDB_path = base_rag_path + config.get("vector_db.index_path")
+    vecDB_path = base_rag_path + "/" + config.get("vector_db.index_path")
     retriever = RetrieverCreator(
         config, embedding_model, vecDB_path, collection_name="four_famous"
     ).create_retriever()
 
-    retrieved_docs = retriever.invoke(query)
+    template_retrieved = "在{book}中, {query}"
+    retrieved_dict = {"book": book, "query": query}
+    retrieved_docs = retriever.invoke(template_retrieved.format(**retrieved_dict))
     retrieved_info = format_docs(retrieved_docs, None)
 
-    # from langchain.prompts import PromptTemplate
-    # template = """假如你是<{book}>中的{role}，请与我对话。我知道的有： \n
-    #     {retrieved_info}\n
-    #     请你回答这个问题： {query}。\n
-    #     {spec_role}道："""
+    # template = """假如你是<{book}>中的{role}，请与我对话。下面是已知信息： \n
+        # {retrieved_info}\n
+        # 请你根据这些信息回答这个问题：{query}。\n
+        # {spec_role}道：“"""
 
     # input_dict = {"book": book, "role": role, "retrieved_info": retrieved_info, "query": query, "spec_role": ROLE_DICT[book][role]}
     # input = template.format(**input_dict)
@@ -143,18 +144,18 @@ def get_prompt(
                 get_RAG_prompt(book, role, msgs[i]["content"]) if has_RAG else ""
             )
             if i == 2:
-                user_input = """假如你是<{book}>中的{role}，请与我对话。我知道的有： \n
+                user_input = """假如你是<{book}>中的{role}，请与我对话。下面是已知信息： \n
                 {retrieved_info}\n
-                请你回答这个问题： {query}""".format(
+                请你根据这些信息回答这个问题： {query}""".format(
                     book=book,
                     role=role,
                     retrieved_info=retrieved_info,
                     query=msgs[i]["content"],
                 )
             else:
-                user_input = """我知道的有： \n
+                user_input = """下面是已知信息： \n
                 {retrieved_info}\n
-                请你回答这个问题： {query}""".format(
+                请你根据这些信息回答这个问题： {query}""".format(
                     book=book,
                     role=role,
                     retrieved_info=retrieved_info,
