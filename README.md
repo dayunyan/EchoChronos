@@ -6,7 +6,24 @@ Gitee 是 OSCHINA 推出的基于 Git 的代码托管平台（同时支持 SVN�
 无论是个人、团队、或是企业，都能够用 Gitee 实现代码托管、项目管理、协作开发。企业项目请看 [https://gitee.com/enterprises](https://gitee.com/enterprises)}
 
 #### 软件架构
-软件架构说明
+huawei-ict-2024
+├─ ChatStyle  # ChatStyle模块
+├─ managers   # 管理器模块，用于提供各个模块的接口
+│  ├─ __init__.py
+│  ├─ connect.py  # 连接管理器， 目前只有websocket连接方式
+│  ├─ constants.py  # 常量
+│  ├─ model.py  # 风格对话模型管理器
+│  ├─ rag.py  # RAG模型管理器
+│  ├─ runner.py  # 运行器管理器，用于编写推理等逻辑
+│  └─ tts.py  # TTS模型管理器
+├─ RAG  # RAG模块
+├─ TTS  # TTS模块
+├─ utils  # 工具包
+├─ inference_torch.py  # 推理代码 PyTorch
+├─ inference.py  # 推理代码 MindSpore
+├─ launch.py  # 项目入口
+├─ README.en.md
+└─ README.md
 
 
 #### 安装教程
