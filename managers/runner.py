@@ -58,9 +58,9 @@ class RunnerManager:
                 }
             )
             self.model_manager.infer(self.messages, self.source, self.role)
-            # self.tts_manager.process(
-            #     self.messages[-1]["role"], self.messages[-1]["content"]
-            # )
+            self.tts_manager.process(
+                self.messages[-1]["role"], self.messages[-1]["content"]
+            )
 
     def _run_websocket(self, msg):
         client_msg = json.loads(msg)
@@ -72,9 +72,9 @@ class RunnerManager:
                 }
             )
             self.model_manager.infer(self.messages, self.source, self.role)
-            # self.tts_manager.process(
-            #     self.messages[-1]["role"], self.messages[-1]["content"]
-            # )
+            self.tts_manager.process(
+                self.messages[-1]["role"], self.messages[-1]["content"]
+            )
             return json.dumps(self.messages[-1]["content"])
         else:
             return "Invalid role"
