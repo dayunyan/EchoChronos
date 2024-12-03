@@ -1,6 +1,7 @@
 import json
 from typing import List, Dict, Tuple
 import argparse
+import time
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from peft import get_peft_model, LoraConfig, peft_model
@@ -84,7 +85,7 @@ def get_RAG_prompt(book: str = "西游记", role: str = "孙悟空", query: str 
         return None
 
     # TODO: update when env changed
-    base_rag_path = "/root/work_dir/huawei-ict-2024/RAG/rain-rag"
+    base_rag_path = "./RAG/rain-rag"
     # TODO: change config info if necessary, such as embedding model PATH, retriever PATH, etc.
 
     import sys
@@ -122,9 +123,9 @@ def get_RAG_prompt(book: str = "西游记", role: str = "孙悟空", query: str 
     retrieved_info = format_docs(retrieved_docs, None)
 
     # template = """假如你是<{book}>中的{role}，请与我对话。下面是已知信息： \n
-        # {retrieved_info}\n
-        # 请你根据这些信息回答这个问题：{query}。\n
-        # {spec_role}道：“"""
+    # {retrieved_info}\n
+    # 请你根据这些信息回答这个问题：{query}。\n
+    # {spec_role}道：“"""
 
     # input_dict = {"book": book, "role": role, "retrieved_info": retrieved_info, "query": query, "spec_role": ROLE_DICT[book][role]}
     # input = template.format(**input_dict)
@@ -133,7 +134,7 @@ def get_RAG_prompt(book: str = "西游记", role: str = "孙悟空", query: str 
 
 
 def get_prompt(
-    msgs: List[Dict], book: str = "西游记", role: str = "孙悟空", has_RAG=True
+    msgs: List[Dict], book: str = "西游记", role: str = "孙悟空", has_RAG=False
 ):
     text = ""
     for i in range(len(msgs)):
@@ -143,15 +144,22 @@ def get_prompt(
             retrieved_info = (
                 get_RAG_prompt(book, role, msgs[i]["content"]) if has_RAG else ""
             )
-            if i == 2:
-                user_input = """假如你是<{book}>中的{role}，请与我对话。下面是已知信息： \n
-                {retrieved_info}\n
-                请你根据这些信息回答这个问题： {query}""".format(
-                    book=book,
-                    role=role,
-                    retrieved_info=retrieved_info,
-                    query=msgs[i]["content"],
+            if i == 1:
+                user_input = (
+                    """假如你是<{book}>中的{role}，请与我对话。\n {query}""".format(
+                        book=book,
+                        role=role,
+                        query=msgs[i]["content"],
+                    )
                 )
+                # user_input = """假如你是<{book}>中的{role}，请与我对话。下面是已知信息： \n
+                # {retrieved_info}\n
+                # 请你根据这些信息回答这个问题： {query}""".format(
+                #     book=book,
+                #     role=role,
+                #     retrieved_info=retrieved_info,
+                #     query=msgs[i]["content"],
+                # )
             else:
                 user_input = """下面是已知信息： \n
                 {retrieved_info}\n
@@ -244,18 +252,25 @@ def run(args):
         #     tokenize=False,
         #     add_generation_prompt=True,
         # )
-        text = get_prompt(messages, book="红楼梦", role="林黛玉")  # TODO get RAG prompt
+        text = get_prompt(
+            messages, book="红楼梦", role="林黛玉", has_RAG=False
+        )  # TODO get RAG prompt
 
         # print((f"text: {text}", f"prompt: {prompt}"))
         model_inputs = tokenizer([text], return_tensors="pt").to(model.device)
         model_inputs["max_new_tokens"] = args.inf_max_length
         # print(f"{model_inputs}")
 
+        t1 = time.time()
         outputs = model.generate(**model_inputs)
+        t2 = time.time()
         outputs = [
             output_ids[len(input_ids) :]
             for input_ids, output_ids in zip(model_inputs["input_ids"], outputs)
         ]
+        print(
+            f"generate time: {t2 - t1:.4f}, tokens/s: {outputs[0].shape[0] / (t2 - t1)}"
+        )
         # print(outputs)
         text_output = tokenizer.batch_decode(outputs, skip_special_tokens=True)[0]
         print(f"A: {text_output.strip('“”')}")
