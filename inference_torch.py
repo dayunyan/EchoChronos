@@ -1,4 +1,5 @@
 import json
+import time
 from typing import List, Dict, Tuple
 import argparse
 import time
@@ -145,12 +146,13 @@ def get_prompt(
                 get_RAG_prompt(book, role, msgs[i]["content"]) if has_RAG else ""
             )
             if i == 1:
-                user_input = (
-                    """假如你是<{book}>中的{role}，请与我对话。\n {query}""".format(
-                        book=book,
-                        role=role,
-                        query=msgs[i]["content"],
-                    )
+                user_input = """假如你是<{book}>中的{role}，请与我对话。下面是已知信息： \n
+                {retrieved_info}\n
+                请你根据这些信息回答这个问题： {query}""".format(
+                    book=book,
+                    role=role,
+                    retrieved_info=retrieved_info,
+                    query=msgs[i]["content"],
                 )
                 # user_input = """假如你是<{book}>中的{role}，请与我对话。下面是已知信息： \n
                 # {retrieved_info}\n
