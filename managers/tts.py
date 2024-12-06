@@ -10,7 +10,7 @@ class TTSManager:
 
     def get_data(
         self,
-        role,
+        character,
         target_text,
         prompt_language="中文",
         text_language="中文",
@@ -22,7 +22,7 @@ class TTSManager:
     ):
 
         return {
-            "character": role,
+            "character": character,
             # 'prompt_text': prompt_text,
             "prompt_language": prompt_language,  # 参考文本的语言
             "text": target_text,
@@ -36,7 +36,7 @@ class TTSManager:
 
     def process(
         self,
-        role,
+        character,
         target_text,
         prompt_language="中文",
         text_language="中文",
@@ -47,7 +47,7 @@ class TTSManager:
         ref_free=False,
     ):
         data = self.get_data(
-            role,
+            character,
             target_text,
             prompt_language,
             text_language,
@@ -59,10 +59,8 @@ class TTSManager:
         )
         response = requests.post(self.server_url, data=data)
         if response.status_code == 200:
-            with open("output_audio.wav", "wb") as f:
-                f.write(response.content)
-            print("Audio saved as output_audio.wav")
+            audio_content = response.content
         else:
             print(f"Error: {response.status_code}, {response.text}")
 
-        return response.json()
+        return audio_content

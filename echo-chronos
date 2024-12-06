@@ -1,0 +1,7 @@
+#!/bin/bash
+
+if [ "$1" == "run" ]; then
+    python launch.py "$2"
+else
+    echo "Invalid command. Usage: echo-chronos run <yaml_file_path>"
+fi

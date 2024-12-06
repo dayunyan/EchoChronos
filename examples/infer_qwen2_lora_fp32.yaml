@@ -1,0 +1,77 @@
+# echo_qwen2_lora_fp32.yaml
+# global configuration
+global:
+  project_name: "Echo Chronos"
+  log_level: "INFO"
+  logging_enabled: true
+  environment:
+    version: "development"
+    branch: "develop"
+    framework: "pytorch" # optional["pytorch", "mindspore"]
+
+# runner configuration
+runner:
+  mode: "inference"
+  source: "西游记" # optional["西游记", "水浒传", "红楼梦", "三国演义"]
+  character: "孙悟空"
+  isTerminal: false
+  isWebsocket: false
+  isWebUI: true
+  host: "0.0.0.0"
+  port: 6006
+  has_tts: true
+  tts_server: "http://172.24.244.174:5000/tts"
+
+# model configuration
+model:
+  model_name: "Qwen2-7B-Instruct"  # 模型名称
+  model_path: "./model_zoo/Qwen/Qwen2-7B-Instruct"  # 模型路径
+  model_kwargs: {"torch_dtype": bfloat16, "device_map": "auto"}
+  generate_kwargs: {"max_new_tokens": 1024, "temperature": 0.95, "top_p": 0.7,"top_k": 40, "do_sample": True, "repetition_penalty": 1.1} # 生成参数
+  adapter_name: "LoRA"
+  adapter_path: "./ChatStyle/results/20241112LF-qwen2-7B-Instruct"
+  has_rag: true
+
+
+# RAG模型配置文件
+rag_config:
+  # 数据源配置
+  data:
+    raw_data_path: "./RAG/EchoRAG/datasets/four_famous"
+    processed_data_path: "./RAG/EchoRAG/datasets/four_famous"
+
+  # 向量数据库配置
+  vector_db:
+    type: "chroma"  # 向量数据库类型，例如 "chroma", "faiss", "pinecone"
+    index_path: "./RAG/EchoRAG/vectordatabase/chroma" #"vectordatabase/chroma"
+    embedding_dimension: 1024  # 向量维度，视具体模型而定
+
+  embedding:
+    model_name: "bge-large-zh-v1.5"  # 可以根据需要选择不同的模型
+    model_path: "./model_zoo/BAAI/bge-large-zh-v1.5"  # 模型路径
+    model_kwargs: {"device": "cuda"}
+    useAPI: false  # 是否使用OpenAI API
+    # api_url: "https://api.openai.com/v1/completions"  # OpenAI API的URL
+    # api_key: "your-openai-api-key"  # OpenAI API密钥
+
+  # LangChain模块配置
+  langchain_modules:
+
+    text_splitter:
+      chunk_size: 512  # 分块大小
+      chunk_overlap: 150 # 分块重叠
+
+    retrievers:
+      vector_retriever:
+        use_gpu: true  # 是否使用GPU加速
+        retrieval_type: "mmr"  # 检索类型,similarity,“similarity” (default), “mmr”, or “similarity_score_threshold”
+        search_kwargs: {"k": 5, "fetch_k": 50}  # 检索参数
+        filter: {"book": "西游记"}  # 过滤器 Filted by document metadata
+        # k: 5  # 返回的项数
+        # fetch_k: 50  # 检索的项数
+
+  # 错误处理与重试配置
+  error_handling:
+    max_retries: 3  # 最大重试次数
+    retry_delay: 5  # 重试间隔时间，单位秒
+    timeout: 30  # 请求超时，单位秒
