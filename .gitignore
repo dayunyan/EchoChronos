@@ -146,3 +146,7 @@ cython_debug/
 .mindnlp/
 checkpoints/
 model_zoo/
+
+# Runtime files
+profiler/
+rank_*/
