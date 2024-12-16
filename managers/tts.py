@@ -1,3 +1,4 @@
+import json
 import requests
 
 
@@ -61,6 +62,10 @@ class TTSManager:
         if response.status_code == 200:
             audio_content = response.content
         else:
-            print(f"Error: {response.status_code}, {response.text}")
+            try:
+                error_info = response.json()
+                print(f"Error: {response.status_code}, {error_info}")
+            except json.JSONDecodeError:
+                print(f"Error: {response.status_code}, {response.text}")
 
         return audio_content

@@ -29,10 +29,11 @@ EchoChronos
 
 #### Installation
 
-python >= 3.11
+python==3.11
 ``` shell
 git clone --recursive https://gitee.com/xujunda2024/echochronos.git
 cd echochronos
+conda install ffmpeg
 pip install -r requirements.txt
 ```
 
@@ -42,10 +43,18 @@ pip install -r requirements.txt
 
 2. After successfully installing the dependencies, prepare the configuration file in the format of `examples/infer_qwen2_lora_fp32.yaml` (be sure to modify the parameters in the configuration file according to your needs). 
 
-3. Currently, this project provides three modes of operation, which can be changed by modifying the "isTerminal", "isWebsocket", and "isWebUI" parameters in the YAML file: 
+3. Start the GPT-SOVITS service.
+    - Prepare the model: For details, please refer to the [README.md](./TTS/GPT-SoVITS-main/README.md) file of the GPT-SOVITS project.
+    - Start the service:
+        ``` shell
+        cd TTS/GPT-SoVITS-main/GPT_SOVITS
+        python Server.py
+        ```
+
+4. Currently, this project provides three modes of operation, which can be changed by modifying the "isTerminal", "isWebsocket", and "isWebUI" parameters in the YAML file (Replace `<your_yaml_path>` with your YAML-formatted configuration file). 
     - Terminal: `python launch.py <your_yaml_path>`
     - WebSocket: `python launch.py <your_yaml_path>`
-    - WebUI: `streamlit run launch.py <your_yaml_path>`
+    - WebUI (Recommendation): `streamlit run launch.py <your_yaml_path>`
 
 > [!TIP]
 > MindSpore currently only supports two execution modes: Terminal and WebSocket, with the entry point being inference.py.

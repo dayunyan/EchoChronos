@@ -20,7 +20,7 @@ runner:
   host: "0.0.0.0"
   port: 6006
   has_tts: true
-  tts_server: "http://172.24.244.174:5000/tts"
+  tts_server: "http://localhost:5000/tts"
 
 # model configuration
 model:
