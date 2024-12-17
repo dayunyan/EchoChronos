@@ -1,9 +1,217 @@
+import logging
+import os
+from typing import List, Dict, Tuple
+import mindspore as ms
+from mindnlp.peft import PeftModel, PeftConfig, LoraConfig, get_peft_model
+from mindnlp.transformers import AutoModelForCausalLM, AutoTokenizer
 import streamlit as st
-import sys
+import requests
+import base64
 
-# from utils.argparser import get_args, check_args
+from RAG import ConfigLoader, EmbeddingModelCreator, RetrieverCreator
+
+from llm.TorchModel_lora import Torch_Lora_LLM
+
 from utils.yamlparam import YAMLParamHandler
-from managers.runner import RunnerManager
+
+
+os.environ["CUDA_VISIBLE_DEVICES"] = "0,1"  # 指定显卡
+
+yaml_path = "./examples/infer_qwen2_lora_fp32.yaml"
+yaml_data = YAMLParamHandler(yaml_path).get_yaml_params()
+rag_config = yaml_data.get("rag_config", {})
+
+
+@st.cache_resource
+def load_config():
+    return ConfigLoader(rag_config)
+
+
+@st.cache_resource
+def load_embedding(_config):
+    embedding_creator = EmbeddingModelCreator(_config)
+    embedding_model = embedding_creator.create_embedding_model()
+    return embedding_model
+
+
+# @st.cache_resource
+def load_vecDB(_config, embedding_model):
+    retriever_creator = RetrieverCreator(_config, embedding_model)
+    return retriever_creator
+
+
+@st.cache_resource
+def load_Qwen2_7b_llm(_config):
+    model_name_or_path = _config.get("model_path", "model_name")
+    model_kwargs = _config["model"].get("model_kwargs", {})
+    tokenizer = AutoTokenizer.from_pretrained(model_name_or_path)
+    model = AutoModelForCausalLM.from_pretrained(model_name_or_path, **model_kwargs)
+    adapter_path = _config.get("adapter_path", "adapter_name")
+    lora_config = PeftConfig.from_pretrained(adapter_path)
+    model = get_peft_model(model, lora_config)
+    model.eval()
+    return tokenizer, model
+
+
+def format_docs(docs, wiki_docs=None):
+    ans = "从古籍中检索到的信息如下：\n\n"
+    for id, doc in enumerate(docs):
+        ans += f"{id+1}. {doc.page_content}\n\n"
+    if wiki_docs is not None:
+        ans += "从维基百科中检索到的信息如下：\n\n"
+        ans += f'{len(docs)+1}. {wiki_docs[0].metadata["summary"]}\n\n'
+    # print(f'检索到的信息有：{ans}')
+    return ans
+
+
+def get_prompt(
+    msgs: List[Dict],
+    source: str = "西游记",
+    role: str = "孙悟空",
+    has_RAG=True,
+    rag_info: str = "",
+):
+    text = ""
+    for i in range(len(msgs)):
+        if msgs[i]["role"] == "system":
+            text += prompt_system.format(msgs[i]["content"])
+        elif msgs[i]["role"] == "user":
+            retrieved_info = rag_info if has_RAG else ""
+            if i == 1:
+                if i == len(msgs) - 1:
+                    user_input = """假如你是<{source}>中的{role}，请与我对话。\n
+                    {retrieved_info}\n
+                    参考以上信息，与我对话。\n
+                    {query}""".format(
+                        source=source,
+                        role=role,
+                        retrieved_info=retrieved_info,
+                        query=msgs[i]["content"],
+                    )
+                else:
+                    user_input = """假如你是<{source}>中的{role}，请与我对话。\n
+                    {query}""".format(
+                        source=source,
+                        role=role,
+                        query=msgs[i]["content"],
+                    )
+            else:
+                if i == len(msgs) - 1:
+                    user_input = """{retrieved_info}\n
+                    参考以上信息，与我对话。\n
+                    {query}""".format(
+                        retrieved_info=retrieved_info,
+                        query=msgs[i]["content"],
+                    )
+                else:
+                    user_input = """{query}""".format(
+                        query=msgs[i]["content"],
+                    )
+
+            text += prompt_user.format(user_input)
+        else:
+            text += prompt_assistant.format(msgs[i]["content"])
+    text += f"{ROLE_DICT[source][role]}道："
+
+    return text
+
+
+ROLE_DICT = {
+    "西游记": {
+        "孙悟空": "悟空",
+        "唐僧": "唐僧",
+        "猪八戒": "八戒",
+        "沙僧": "沙僧",
+    },
+    "三国演义": {
+        "刘备": "玄德",
+        "关羽": "云长",
+        "张飞": "翼德",
+        "曹操": "孟德",
+        "诸葛亮": "孔明",
+    },
+    "水浒传": {
+        "宋江": "宋公明",
+        "卢俊义": "玉麒麟",
+        "吴用": "智多星",
+        "林冲": "豹子头",
+    },
+    "红楼梦": {
+        "贾宝玉": "宝玉",
+        "林黛玉": "黛玉",
+        "薛宝钗": "宝钗",
+        "王熙凤": "凤姐",
+    },
+}
+
+prompt_system = "<|im_start|>system\n{}<|im_end|>\n"
+prompt_user = "<|im_start|>user\n{}<|im_end|>\n<|im_start|>assistant\n"
+prompt_assistant = "{}<|im_end|>\n"
+
+# 初始化历史对话记录
+if "messages" not in st.session_state:
+    st.session_state.messages = [
+        {
+            "role": "system",
+            "content": "You are Qwen, created by Alibaba Cloud. You are a helpful assistant.",
+        },
+    ]
+
+# if 'retrieve' not in st.session_state:
+#     st.session_state.retrieve = None
+
+# def set_retrieve(info):
+#     st.session_state.retrieve = info
+
+if "audio" not in st.session_state:
+    st.session_state.audio = []
+
+
+def append_audio(audio):
+    st.session_state.audio.append(audio)
+
+
+# 设置服务器地址和端口
+server_url = (
+    yaml_data["runner"].get("tts_server")
+    if yaml_data["runner"].get("has_tts", False)
+    else None
+)
+
+
+# 定义生成音频的函数
+def generate_audio(character, text):
+    # 设置要传递的参数
+    prompt_language = "中文"  # 参考文本的语言
+    text_language = "中文"  # 目标文本的语言
+    how_to_cut = "按中文句号。切"  # 文本切分方式
+    top_k = 20  # Top-K 参数
+    top_p = 0.8  # Top-P 参数
+    temperature = 0.6  # 温度参数
+    ref_free = False  # 是否使用参考音频
+
+    # 准备POST请求的payload
+    data = {
+        "character": character,
+        "prompt_language": prompt_language,
+        "text": text,
+        "text_language": text_language,
+        "how_to_cut": how_to_cut,
+        "top_k": top_k,
+        "top_p": top_p,
+        "temperature": temperature,
+        "ref_free": ref_free,
+    }
+
+    # 发送POST请求
+    response = requests.post(server_url, data=data)
+
+    if response.status_code == 200:
+        # 返回的音频文件内容
+        audio_content = response.content
+        return audio_content
+    else:
+        return f"Error: {response.status_code}, {response.text}"
 
 
 # 设置页面标题
@@ -11,6 +219,8 @@ st.set_page_config(page_title="EchoChronos", layout="wide", page_icon="🦜")
 
 st.sidebar.title("Configuration")
 temperature = st.sidebar.slider("Temperature:", 0.01, 1.0, 1.0)
+top_k = st.sidebar.slider("Top K:", 1, 50, 10)
+top_p = st.sidebar.slider("Top P:", 0.01, 1.0, 0.7)
 numk = st.sidebar.slider("Number of retrieved documents:", 0, 10, 3)
 max_new_tokens = st.sidebar.slider("Max generation tokens:", 1, 2048, 512)
 
@@ -60,8 +270,8 @@ st.write(
 
 col1, col2 = st.columns(2)
 with col1:
-    book = st.selectbox(
-        "选择书籍", ["红楼梦", "西游记", "三国演义", "水浒传"], key="book"
+    source = st.selectbox(
+        "选择书籍", ["红楼梦", "西游记", "三国演义", "水浒传"], key="source"
     )
 with col2:
     character = st.selectbox(
@@ -69,6 +279,28 @@ with col2:
         ["林黛玉", "贾宝玉", "孙悟空", "猪八戒", "诸葛亮", "曹操", "林冲", "鲁智深"],
         key="char",
     )
+
+# 用户输入框
+# query = st.text_area("请输入你的问题：", height=100)
+
+# LangChain 配置
+template = """请仅根据以下信息回答，不要添加任何额外的假设或知识: \n
+    {retrieved_info}\n
+    请回答以下问题: {query}\n"""
+
+config = load_config()
+tokenizer, model = load_Qwen2_7b_llm(config)
+embedding = load_embedding(config)
+
+vecDB = load_vecDB(config, embedding)
+
+# prompt = PromptTemplate(template=template, input_variables=["query", "retrieved_info"])
+
+log_level = config.get("global.log_level", "INFO")
+logging.basicConfig(
+    level=log_level, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
+logger = logging.getLogger(__name__)
 
 
 # 显示对话
@@ -148,14 +380,14 @@ def user_input():
         with st.spinner("正在生成回答..."):
             st.session_state.messages.append({"role": "user", "content": query})
 
-            template_retrieved = "在{book}中, 针对{character}这个角色的提问：{query}"
-            retrieved_dict = {"book": book, "character": character, "query": query}
+            template_retrieved = "在{source}中, 针对{character}这个角色的提问：{query}"
+            retrieved_dict = {"source": source, "character": character, "query": query}
 
-            search_type = config.get(
+            search_type = rag_config.get(
                 "langchain_modules.retrievers.vector_retriever.retrieval_type",
                 "similarity",
             )
-            search_kwargs = config.get(
+            search_kwargs = rag_config.get(
                 "langchain_modules.retrievers.vector_retriever.search_kwargs", {}
             )
             search_kwargs["k"] = numk
@@ -174,26 +406,24 @@ def user_input():
 
             input = get_prompt(
                 st.session_state.messages,
-                book=book,
+                source=source,
                 role=character,
                 has_RAG=True,
                 rag_info=formatted_docs,
             )
 
             # rag_res = llm(input)
-            model_inputs = llm.tokenizer([input], return_tensors="pt").to("cuda")
-            generated_ids = llm.model.generate(
+            model_inputs = tokenizer([input], return_tensors="ms")
+            generate_kwargs = config["model"].get("generate_kwargs", {})
+            generated_ids = model.generate(
                 model_inputs.input_ids,
-                max_new_tokens=max_new_tokens,
-                temperature=temperature,
+                **generate_kwargs,
             )
             generated_ids = [
                 output_ids[len(input_ids) :]
                 for input_ids, output_ids in zip(model_inputs.input_ids, generated_ids)
             ]
-            rag_res = llm.tokenizer.batch_decode(
-                generated_ids, skip_special_tokens=True
-            )[0]
+            rag_res = tokenizer.batch_decode(generated_ids, skip_special_tokens=True)[0]
 
             st.session_state.messages.append(
                 {"role": "assistant", "content": rag_res.strip(" ").strip("“”")}
