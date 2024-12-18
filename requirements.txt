@@ -1,14 +1,15 @@
+chromadb
 cn2an==0.5.22
 einops==0.8.0
 evaluate==0.4.3
-fastapi==0.115.6
-faster_whisper==1.1.0
+fastapi<0.112.2
+Faster_Whisper
 ffmpeg_python==0.2.0
 Flask==3.1.0
 funasr==1.0.27
 g2p_en==2.1.0
 g2pk2==0.0.3
-gradio==5.9.0
+gradio==4.24.0
 gruut==2.4.0
 jamo==0.4.1
 jieba==0.42.1
@@ -28,10 +29,11 @@ mindspore==2.4.1
 modelscope==1.10.0
 nltk==3.9.1
 numpy==1.23.4
-onnxruntime==1.20.1
-onnxruntime_gpu==1.20.1
+onnxruntime==1.20.1; sys_platform == 'darwin'
+onnxruntime_gpu==1.20.1; sys_platform != 'darwin'
 openai_whisper==20240930
-OpenCC==1.1.1
+opencc; sys_platform != 'linux'
+opencc==1.1.1; sys_platform == 'linux'
 packaging==24.2
 pandas==2.2.3
 peft==0.12.0
@@ -40,7 +42,6 @@ pydantic==2.10.3
 pyjyutping==1.0.0
 pyopenjtalk==0.3.4
 pypinyin==0.53.0
-PyQt5==5.15.11
 pytorch_lightning==2.4.0
 PyYAML==6.0.2
 PyYAML==6.0.2
@@ -48,9 +49,11 @@ regex==2024.11.6
 Requests==2.32.3
 rotary_embedding_torch==0.8.6
 scipy==1.14.1
+sentence_transformers
 setuptools==75.1.0
 soundfile==0.12.1
 streamlit==1.40.2
+tokenizers==0.20.3
 torch==2.5.1
 torchaudio==2.5.1
 torchmetrics==1.6.0

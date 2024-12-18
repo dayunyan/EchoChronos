@@ -17,14 +17,14 @@ from utils.yamlparam import YAMLParamHandler
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "0,1"  # 指定显卡
 
-yaml_path = "./examples/infer_qwen2_lora_fp32.yaml"
+yaml_path = "./examples/infer_qwen2_lora_fp32_ms.yaml"
 yaml_data = YAMLParamHandler(yaml_path).get_yaml_params()
 rag_config = yaml_data.get("rag_config", {})
 
 
 @st.cache_resource
-def load_config():
-    return ConfigLoader(rag_config)
+def load_config(_config):
+    return ConfigLoader(_config)
 
 
 @st.cache_resource
@@ -42,12 +42,13 @@ def load_vecDB(_config, embedding_model):
 
 @st.cache_resource
 def load_Qwen2_7b_llm(_config):
+    _config = _config["model"]
     model_name_or_path = _config.get("model_path", "model_name")
-    model_kwargs = _config["model"].get("model_kwargs", {})
+    model_kwargs = _config.get("model_kwargs", {})
     tokenizer = AutoTokenizer.from_pretrained(model_name_or_path)
     model = AutoModelForCausalLM.from_pretrained(model_name_or_path, **model_kwargs)
     adapter_path = _config.get("adapter_path", "adapter_name")
-    lora_config = PeftConfig.from_pretrained(adapter_path)
+    lora_config = LoraConfig.from_pretrained(adapter_path)
     model = get_peft_model(model, lora_config)
     model.eval()
     return tokenizer, model
@@ -288,15 +289,15 @@ template = """请仅根据以下信息回答，不要添加任何额外的假设
     {retrieved_info}\n
     请回答以下问题: {query}\n"""
 
-config = load_config()
-tokenizer, model = load_Qwen2_7b_llm(config)
+config = load_config(rag_config)
+tokenizer, model = load_Qwen2_7b_llm(yaml_data)
 embedding = load_embedding(config)
 
 vecDB = load_vecDB(config, embedding)
 
 # prompt = PromptTemplate(template=template, input_variables=["query", "retrieved_info"])
 
-log_level = config.get("global.log_level", "INFO")
+log_level = yaml_data["global"].get("log_level", "INFO")
 logging.basicConfig(
     level=log_level, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
@@ -383,11 +384,11 @@ def user_input():
             template_retrieved = "在{source}中, 针对{character}这个角色的提问：{query}"
             retrieved_dict = {"source": source, "character": character, "query": query}
 
-            search_type = rag_config.get(
+            search_type = config.get(
                 "langchain_modules.retrievers.vector_retriever.retrieval_type",
                 "similarity",
             )
-            search_kwargs = rag_config.get(
+            search_kwargs = config.get(
                 "langchain_modules.retrievers.vector_retriever.search_kwargs", {}
             )
             search_kwargs["k"] = numk
@@ -404,7 +405,7 @@ def user_input():
 
             # logger.info(formatted_docs)
 
-            input = get_prompt(
+            inputs = get_prompt(
                 st.session_state.messages,
                 source=source,
                 role=character,
@@ -413,10 +414,10 @@ def user_input():
             )
 
             # rag_res = llm(input)
-            model_inputs = tokenizer([input], return_tensors="ms")
-            generate_kwargs = config["model"].get("generate_kwargs", {})
+            model_inputs = tokenizer([inputs], return_tensors="ms")
+            generate_kwargs = yaml_data["model"].get("generate_kwargs", {})
             generated_ids = model.generate(
-                model_inputs.input_ids,
+                input_ids=model_inputs.input_ids,
                 **generate_kwargs,
             )
             generated_ids = [
