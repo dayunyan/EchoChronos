@@ -2,6 +2,8 @@ import logging
 import os
 from typing import List, Dict, Tuple
 import mindspore as ms
+from mindspore import context
+from mindspore.communication import init
 from mindnlp.peft import PeftModel, PeftConfig, LoraConfig, get_peft_model
 from mindnlp.transformers import AutoModelForCausalLM, AutoTokenizer
 import streamlit as st
@@ -15,11 +17,25 @@ from llm.TorchModel_lora import Torch_Lora_LLM
 from utils.yamlparam import YAMLParamHandler
 
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "0,1"  # 指定显卡
+os.environ["CUDA_VISIBLE_DEVICES"] = "1"  # 指定显卡
+context.set_context(device_target="GPU")
+# ms.set_auto_parallel_context(
+#     parallel_mode=ms.ParallelMode.DATA_PARALLEL,
+#     gradients_mean=True,
+#     parameter_broadcast=True,
+# )
+# ms.common.set_seed(42)
+# init("nccl")
 
 yaml_path = "./examples/infer_qwen2_lora_fp32_ms.yaml"
 yaml_data = YAMLParamHandler(yaml_path).get_yaml_params()
 rag_config = yaml_data.get("rag_config", {})
+
+
+def get_model_kwargs(kwargs):
+    if "ms_dtype" in kwargs:
+        kwargs["ms_dtype"] = getattr(ms, kwargs["ms_dtype"])
+    return kwargs
 
 
 @st.cache_resource
@@ -46,7 +62,9 @@ def load_Qwen2_7b_llm(_config):
     model_name_or_path = _config.get("model_path", "model_name")
     model_kwargs = _config.get("model_kwargs", {})
     tokenizer = AutoTokenizer.from_pretrained(model_name_or_path)
-    model = AutoModelForCausalLM.from_pretrained(model_name_or_path, **model_kwargs)
+    model = AutoModelForCausalLM.from_pretrained(
+        model_name_or_path, **get_model_kwargs(model_kwargs)
+    )
     adapter_path = _config.get("adapter_path", "adapter_name")
     lora_config = LoraConfig.from_pretrained(adapter_path)
     model = get_peft_model(model, lora_config)
