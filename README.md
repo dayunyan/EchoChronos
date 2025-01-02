@@ -40,10 +40,10 @@ conda install ffmpeg
 #### Install MindNLP
 
 ``` shell
-pip install mindnlp==0.4.0
+pip install git+https://github.com/mindspore-lab/mindnlp.git
 ```
 
-#### Install 其它依赖
+#### Install other dependencies
 
 ``` shell
 git clone --recursive https://gitee.com/xujunda2024/echochronos.git

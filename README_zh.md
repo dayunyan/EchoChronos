@@ -40,7 +40,7 @@ conda install ffmpeg
 #### 安装MindNLP
 
 ``` shell
-pip install mindnlp==0.4.0
+pip install git+https://github.com/mindspore-lab/mindnlp.git
 ```
 
 #### 安装其它依赖
