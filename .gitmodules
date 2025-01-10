@@ -1,3 +1,3 @@
 [submodule "RAG/EchoRAG"]
 	path = RAG/EchoRAG
-	url = git@gitee.com:RunningSpring/rain-rag.git
+	url = git@gitee.com:RunningSpring/EchoAgent.git
